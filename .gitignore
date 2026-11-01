@@ -1,0 +1,73 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pyw
+.Python
+*.egg
+*.egg-info/
+dist/
+build/
+*.spec
+
+# Virtual environment
+venv/
+.venv/
+env/
+ENV/
+
+# Environment & secrets — NEVER COMMIT THESE
+.env
+.env.*
+!.env.example
+
+# macOS system files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V3
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Compiled binaries
+bin/*
+!bin/.gitkeep
+
+# SQLite database & runtime data
+data/*
+!data/.gitkeep
+*.db
+*.db-shm
+*.db-wal
+
+# Logs
+logs/*
+!logs/.gitkeep
+*.log
+
+# IDE / editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Personal Obsidian vaults & chat logs — NEVER COMMIT THESE
+vault/
+Brain_Vault/
+AI_Vault/
+
+# Test artifacts / scratch files
+*.tmp
+*.bak
+
+# yt-dlp downloads
+*.part
+
+# Large asset archives & intermediate files
+assets/*.zip
+assets/ash_greninja_3d/
+assets/showdown_gen5/
+greninja_sheet.png

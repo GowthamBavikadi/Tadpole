@@ -1,0 +1,41 @@
+{
+  "default_model": "ash_greninja_3ds",
+  "available_models": [
+    {
+      "id": "ash_greninja_3ds",
+      "name": "3DS Ash-Greninja (Interactive 3D Model + Turntable)",
+      "type": "3ds_rendered_rig",
+      "scale": 1.0,
+      "hud_offset_y": -14
+    },
+    {
+      "id": "shiny_greninja_3ds",
+      "name": "3DS Shiny Black Ash-Greninja (Interactive 3D Model)",
+      "type": "3ds_rendered_rig",
+      "scale": 1.0,
+      "hud_offset_y": -14
+    },
+    {
+      "id": "greninja_3d",
+      "name": "Argon 3D Shinobi Greninja (Vector Rig)",
+      "type": "procedural_3d_rig",
+      "scale": 1.0,
+      "hud_offset_y": -12
+    },
+    {
+      "id": "argon_core_3d",
+      "name": "Argon 3D Mecha-Orb (Gyroscope Core)",
+      "type": "procedural_3d_orb",
+      "scale": 1.0,
+      "hud_offset_y": -12
+    }
+  ],
+  "states": [
+    "idle",
+    "wander",
+    "eating",
+    "thinking",
+    "alert",
+    "sleep"
+  ]
+}
