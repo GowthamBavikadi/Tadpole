@@ -1,4 +1,4 @@
-# Brain — AI-Powered macOS Second Brain
+# Lily Pad
 
 <div align="center">
 
@@ -7,19 +7,31 @@
 ![PySide6](https://img.shields.io/badge/PySide6-6.6%2B-41CD52?style=flat-square&logo=qt&logoColor=white)
 ![License](https://img.shields.io/badge/license-MIT-blue?style=flat-square)
 
-**A floating Ash-Greninja desktop pet that lives on your macOS screen, captures every idea and task you throw at it, and surfaces them through a zero-latency Apple Liquid Glass HUD.**
+**A desktop frog that catches your ideas before your mind hops to the next one.**
 
 </div>
 
 ---
 
-## What It Is
+## The Problem
 
-Brain is a personal AI second-brain built natively for macOS. It runs as a transparent, always-on-top Greninja sprite that roams your desktop. You drag files, URLs, screenshots, and raw thoughts onto it — it triages them with an LLM cascade in the background, persists everything to SQLite and an Obsidian vault, and makes it instantly accessible through a click-to-open HUD. No dock icon. No menu bar clutter. No latency.
+My mind jumps between topics all day. Good ideas disappear the moment I switch context. Most "second brain" tools are built around organization — folders, tags, workflows. That's not the problem I needed to solve. The problem is *capture*. Catching the idea in the first second before it's gone.
+
+So I built a small desktop companion that catches them for me.
+
+---
+
+## What It Does
+
+Lily Pad runs as a floating Ash-Greninja sprite that lives on your macOS screen. You drag a file, URL, screenshot, or half-formed thought onto it — an AI triage engine sorts it into an idea, a task, or a reference in the background, writes a clean summary, and stores it locally. Click the pet to open a native Apple Liquid Glass HUD and see everything you were thinking about, what's pending, and what's worth picking up.
+
+Capture is instant. Nothing needs organizing. Nothing gets lost.
 
 ```
-Drag anything onto Greninja → AI triage (background thread) → SQLite + Obsidian → 0ms HUD
+Drop anything onto the pet  →  AI triage (background thread)  →  SQLite + Obsidian vault  →  0 ms HUD
 ```
+
+Your notes and vault stay on your Mac.
 
 ---
 
@@ -27,49 +39,49 @@ Drag anything onto Greninja → AI triage (background thread) → SQLite + Obsid
 
 | Feature | Detail |
 |---|---|
-| **Floating Desktop Pet** | Ash-Greninja sprite with 60 FPS ballistic throw physics and elastic wall bouncing — roams your Terminal window region autonomously |
-| **Apple Liquid Glass HUD** | Authentic macOS frosted-glass popover with hardware `CGSSetWindowBackgroundBlurRadius` blur, task tabs, ideas tab, and a slash-command input pill |
-| **AI Triage Pipeline** | Multi-provider LLM cascade (Groq → Gemini → Pollinations → NVIDIA NIM) runs on drop in a `QThread` — never on display |
-| **Zero-Latency Surface** | HUD reads static SQLite rows at open time — renders in `<5ms` regardless of vault size |
-| **Drag-and-Drop Capture** | Drop PDFs, images, URLs, text snippets, or Instagram Reel links directly onto the pet |
-| **Obsidian Vault Sync** | Every captured item auto-generates a structured Markdown note with YAML frontmatter into `vault/` |
+| **Floating Desktop Pet** | Ash-Greninja sprite with 60 FPS ballistic throw physics and elastic wall bouncing |
+| **Apple Liquid Glass HUD** | Native macOS frosted-glass popover with hardware blur, task tabs, ideas tab, and a slash-command input |
+| **AI Triage Pipeline** | Multi-provider LLM cascade (Groq → Gemini → Pollinations → NVIDIA NIM) — runs on drop, never on display |
+| **Zero-Latency Surface** | HUD reads static SQLite rows at open time — renders in under 5 ms regardless of vault size |
+| **Drag-and-Drop Capture** | Drop PDFs, images, URLs, text snippets, or video links directly onto the pet |
+| **Obsidian Vault Sync** | Every captured item auto-generates a structured Markdown note with YAML frontmatter |
 | **macOS Automation** | Native Apple Reminders and Calendar creation via AppleScript (`/remind`, `/calendar`) |
 | **Focus Guard** | `/focus [topic]` sets an active focus context broadcast to the AI system prompt |
 | **Inbox Watcher** | Background daemon monitors `~/Desktop/Brain_Drop` and auto-ingests any file dropped there |
-| **Terminal CLI** | Full `brain.py` REPL with streaming AI responses and all slash commands |
+| **Terminal CLI** | Full REPL with streaming AI responses and all slash commands |
 
 ---
 
 ## Architecture
 
 ```
-┌─────────────────────────────────────────────────────────┐
-│                     CAPTURE LAYER                        │
-│  Drag & Drop onto pet  •  Terminal /drop  •  Inbox Watch │
-└──────────────────────────┬──────────────────────────────┘
-                           │  QThread (non-blocking)
-                           ▼
-┌─────────────────────────────────────────────────────────┐
-│               ASYNC TRIAGE ENGINE (brain_ai.py)          │
-│  Groq → Gemini → Pollinations → NVIDIA NIM cascade       │
-│  Single-pass JSON: title, summary, type, tags, due_date  │
-└────────────────┬────────────────────────────────────────┘
-                 │
-      ┌──────────┴───────────┐
-      ▼                      ▼
-┌──────────────┐    ┌──────────────────────┐
-│  SQLite DB   │    │   Obsidian Vault      │
-│  brain.db    │    │   vault/Ideas/        │
-│  drops tasks │    │   vault/Tasks/        │
-│  focus notes │    │   vault/Documents/    │
-└──────┬───────┘    └──────────────────────┘
-       │
-       ▼
-┌─────────────────────────────────────────────────────────┐
-│                    SURFACE LAYER                          │
-│   Liquid Glass HUD  •  Task toggles  •  Focus badge      │
-│   0ms render latency (reads cache only)                  │
-└─────────────────────────────────────────────────────────┘
++----------------------------------------------------------+
+|                      CAPTURE LAYER                       |
+|   Drag & Drop onto pet  *  Terminal /drop  *  Inbox Watch|
++---------------------------+------------------------------+
+                            |  QThread (non-blocking)
+                            v
++----------------------------------------------------------+
+|               ASYNC TRIAGE ENGINE (brain_ai.py)          |
+|   Groq -> Gemini -> Pollinations -> NVIDIA NIM cascade   |
+|   Single-pass JSON: title, summary, type, tags, due_date |
++------------------+---------------------------------------+
+                   |
+        +----------+-----------+
+        v                      v
++---------------+    +----------------------+
+|   SQLite DB   |    |    Obsidian Vault    |
+|   brain.db    |    |    vault/Ideas/      |
+|   drops tasks |    |    vault/Tasks/      |
+|   focus notes |    |    vault/Documents/  |
++-------+-------+    +----------------------+
+        |
+        v
++----------------------------------------------------------+
+|                     SURFACE LAYER                        |
+|   Liquid Glass HUD  *  Task toggles  *  Focus badge     |
+|   0 ms render latency (reads static cache only)         |
++----------------------------------------------------------+
 ```
 
 **Core principle:** Compute on drop. Never on display.
@@ -79,22 +91,22 @@ Drag anything onto Greninja → AI triage (background thread) → SQLite + Obsid
 ## Project Structure
 
 ```
-brain/
+lily-pad/
 ├── src/
-│   ├── pet_main.py          # Entry point — compiles & launches native BrainPet binary
+│   ├── pet_main.py          # Entry point — compiles & launches native binary
 │   ├── pet_window.py        # Transparent overlay, Cocoa flags, physics, drag-drop
 │   ├── pet_hud.py           # Apple Liquid Glass HUD — tasks, ideas, slash commands
 │   ├── brain_core.py        # Unified ingest_drop() pipeline, Obsidian sync
-│   ├── brain_ai.py          # Multi-provider LLM cascade, triage_drop(), polish
+│   ├── brain_ai.py          # Multi-provider LLM cascade, triage_drop(), local refiner
 │   ├── database.py          # SQLite schema, WAL mode, FTS5 full-text search
 │   ├── mac_integration.py   # AppleScript: Reminders + Calendar
 │   ├── brain.py             # Terminal CLI REPL
 │   ├── watcher.py           # ~/Desktop/Brain_Drop folder daemon
 │   └── BrainPet.swift       # Native SwiftUI Liquid Glass binary (compiled on first run)
 ├── assets/
-│   ├── greninja_crouch/     # Sprite sheets (frame_ROW_COL.png, 4 rows × 8 frames)
+│   ├── greninja/            # Sprite sheets (frame_ROW_COL.png, 4 rows x 8 frames)
+│   ├── greninja_crouch/     # Crouch variant sprite sheets
 │   ├── greninja_shiny/      # Shiny variant sprite sheets
-│   ├── ash_greninja_3d/     # 3DS model textures (.fbx, .dae, .smd)
 │   └── pet_manifest.json    # Model registry — hot-swap characters without touching Python
 ├── vault/                   # Obsidian vault (auto-created on first run, git-ignored)
 ├── data/
@@ -114,27 +126,27 @@ brain/
 
 - macOS 14 Sonoma or later
 - Python 3.11+
-- Xcode Command Line Tools (`xcode-select --install`) — required to compile `BrainPet.swift`
+- Xcode Command Line Tools (`xcode-select --install`) — required to compile the Swift binary on first run
 
 ### Install
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/brain.git
-cd brain
+git clone https://github.com/YOUR_USERNAME/lily-pad.git
+cd lily-pad
 
 # Copy and fill in your API keys
 cp .env.example .env
 ```
 
-```bash
+```
 # .env
-GEMINI_API_KEY=AIza...          # Free at aistudio.google.com
-GROQ_API_KEY=gsk_...            # Free at console.groq.com  (optional, fastest)
-NVIDIA_API_KEY=nvapi-...        # Free at build.nvidia.com  (optional, fallback)
+GEMINI_API_KEY=...       # Free at aistudio.google.com
+GROQ_API_KEY=...         # Free at console.groq.com  (optional, fastest)
+NVIDIA_API_KEY=...       # Free at build.nvidia.com  (optional, fallback)
 ```
 
 ```bash
-# Run the desktop pet (creates venv + installs deps on first launch)
+# Run (creates venv + installs deps on first launch)
 ./run.sh
 ```
 
@@ -159,20 +171,20 @@ The first run compiles `src/BrainPet.swift` into `bin/BrainPet` and starts the p
 | **Drag & drop file** | Ingest PDF, image, or any file into the AI pipeline |
 | **Drag & drop URL / text** | Triage and save as idea or task |
 | **Click-drag to move** | Reposition the pet anywhere on screen |
-| **Flick/throw** | Release with velocity to launch the pet with bounce physics |
-| **Right-click** | Context menu: Open Brain, Rest in Place, Open Vault, Quit |
+| **Flick/throw** | Release with velocity to launch with bounce physics |
+| **Right-click** | Context menu: Open HUD, Rest in Place, Open Vault, Quit |
 
 ### HUD Slash Commands
 
 Type directly in the input pill at the bottom of the HUD:
 
 ```
-/focus Ship Brain v2       Set active focus context
+/focus Ship v2             Set active focus context
 /focus off                 Clear focus
-/remind Buy groceries tomorrow 09:00
+/remind Call dentist tomorrow 09:00
 /calendar Team sync 2026-11-05 14:00
 /note Quick thought to capture
-/clear reminders           Delete all Brain-created Apple Reminders
+/clear reminders           Delete all app-created Apple Reminders
 ```
 
 ### Terminal CLI
@@ -180,7 +192,6 @@ Type directly in the input pill at the bottom of the HUD:
 ```bash
 ./run.sh --cli
 
-# Then type naturally:
 > /drop https://arxiv.org/abs/2310.01234    # Triage a paper
 > /drop assets/research.pdf                 # Summarise a PDF
 > /tasks                                    # List pending tasks
@@ -192,14 +203,15 @@ Type directly in the input pill at the bottom of the HUD:
 
 ```bash
 ./run.sh --watcher
-# Drop any file into ~/Desktop/Brain_Drop — auto-ingested and archived to ~/Desktop/Brain_Drop/Processed/
+# Drop any file into ~/Desktop/Brain_Drop
+# Auto-ingested and archived to ~/Desktop/Brain_Drop/Processed/
 ```
 
 ---
 
 ## Auto-Start at Login
 
-> **Note:** Update the working directory paths in `com.gowtham.brainpet.plist` to match your local clone location before loading the agent.
+> **Note:** Update the absolute paths in `com.gowtham.brainpet.plist` to match your local clone location before loading.
 
 ```bash
 mkdir -p ~/Library/LaunchAgents
@@ -226,7 +238,7 @@ The triage engine tries providers in order, falling back automatically:
 3. **Pollinations AI** — zero-key free public endpoint, always available
 4. **NVIDIA NIM** (`llama-3.3-70b-instruct`, `mistral-large-2-instruct`) — requires `NVIDIA_API_KEY`
 
-The provider that responds is shown in the HUD status badge. All providers produce the same structured JSON output.
+All providers produce the same structured JSON output. The active provider is shown in the HUD status badge.
 
 ---
 
@@ -235,10 +247,10 @@ The provider that responds is shown in the HUD status badge. All providers produ
 The pet renderer expects sprites in `assets/<skin_name>/frame_ROW_COL.png`:
 
 ```
-Row 0 → IDLE animation   (8 frames)
-Row 1 → WANDER / THROWN  (8 frames)
-Row 2 → EATING           (8 frames)
-Row 3 → THINKING         (8 frames)
+Row 0  IDLE animation   (8 frames)
+Row 1  WANDER / THROWN  (8 frames)
+Row 2  EATING           (8 frames)
+Row 3  THINKING         (8 frames)
 ```
 
 To add a new skin, drop a folder matching this layout into `assets/` and add an entry to `assets/pet_manifest.json`.
@@ -250,6 +262,7 @@ To add a new skin, drop a folder matching this layout into `assets/` and add an 
 ```
 google-genai>=0.3.0
 python-dotenv>=1.0.0
+requests>=2.31.0
 pypdf>=4.0.0
 yt-dlp>=2024.1.0
 pillow>=10.0.0,<12.0.0
@@ -267,6 +280,5 @@ MIT — see [LICENSE](LICENSE).
 ---
 
 <div align="center">
-Built on a MacBook Air. Powered by Gemini, Groq, and an unhealthy amount of coffee.
+Built on a MacBook Air. Powered by Gemini, Groq, and the need to not lose another idea.
 </div>
-

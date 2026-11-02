@@ -7,8 +7,7 @@
 #   4. NVIDIA NIM    — fallback cloud (requires NVIDIA_API_KEY)
 #
 # Local NLP refiner (polish_raw_text_locally) runs offline with no API call:
-#   - Strips conversational prefixes ("I found a crazy idea for...", "make a task of me having to...")
-#   - Strips trailing filler ("...need to do it", "...have to try this")
+#   - Strips conversational prefixes and trailing filler from raw drops
 #   - Normalises tech terms (github -> GitHub, readme -> README, api -> API)
 #   - Produces a crisp Title + Executive Summary for any raw drop.
 
@@ -64,7 +63,7 @@ def get_gemini_client():
     return _gemini_client
 
 
-SYSTEM_PROMPT = """You are Gowtham's Second-Brain AI.
+SYSTEM_PROMPT = """You are a Second-Brain AI assistant.
 - Direct, concise, zero filler.
 - Always rewrite messy raw input into clear, polished titles and descriptions."""
 
@@ -322,12 +321,12 @@ def polish_raw_text_locally(raw_text: str, is_task: bool = False) -> tuple[str, 
     """
     Transforms conversational raw input into a crisp, executive Title and a refined Summary sentence.
     Examples:
-      - 'I found a crazy idea for my github readme file need to do it'
-        -> Title:   'GitHub README Concept'
-        -> Summary: 'Design and implement the new concept for the GitHub README file.'
-      - 'make a task of me having to buy a jeans tommorow'
-        -> Title:   'Buy a Pair of Jeans'
-        -> Summary: 'Purchase a pair of jeans tomorrow.'
+      - 'check out this article on neural networks'
+        -> Title:   'Neural Networks Article'
+        -> Summary: 'Review and save the referenced article on neural networks.'
+      - 'make a task to call the dentist tomorrow'
+        -> Title:   'Call the Dentist'
+        -> Summary: 'Schedule a call to the dentist tomorrow.'
     """
     s = raw_text.strip()
     for pat, repl in COMMON_TYPOS.items():
@@ -515,7 +514,7 @@ def triage_drop(raw_content: str, source: str = "", drop_hint: str = "") -> dict
     system_prompt = (
         f"You are an Apple Intelligence Executive Editor. Today is {today_str}.\n"
         "Rewrite the user's raw conversational message into a crisp, professional Title and a well-written Summary.\n"
-        "NEVER echo conversational filler like 'I found a crazy idea for...', 'need to do it', or 'make a task of me having to...'.\n"
+        "NEVER echo conversational filler phrases from the original input.\n"
         "Return ONLY valid JSON with this schema:\n"
         "{\n"
         '  "title": "Crisp 2-5 word subject title (e.g., \'GitHub README Redesign\' or \'Buy a Pair of Jeans\')",\n'
@@ -576,7 +575,7 @@ def query_notebook_brain(user_query: str, retrieved_chunks: list[dict], tasks: l
     )
 
     system_prompt = (
-        f"You are Gowtham's Apple Intelligence Second-Brain assistant. Today is {today_str}.\n"
+        f"You are an Apple Intelligence Second-Brain assistant. Today is {today_str}.\n"
         f"Active Focus: {focus}\n\n"
         f"Saved Ideas & Notes in Vault (use if relevant):\n{sources_block or 'None yet.'}\n\n"
         "Answer the user's question directly, clearly, and concisely.\n"
